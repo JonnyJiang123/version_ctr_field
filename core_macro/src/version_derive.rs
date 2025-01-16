@@ -1,8 +1,8 @@
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote, ToTokens};
 use syn::{
-    parse::Parse, parse_quote, punctuated::Punctuated, Data, DataStruct, DeriveInput, Fields,
-    LitStr, Token,
+    parse::Parse, parse_quote, punctuated::Punctuated, spanned::Spanned, Data, DataStruct,
+    DeriveInput, Fields, LitInt, LitStr, Token,
 };
 
 mod kw {
@@ -77,10 +77,12 @@ pub fn version_derive(input: DeriveInput) -> syn::Result<TokenStream> {
                     let list: Punctuated<VersionMeta, Token![,]> =
                         attr.parse_args_with(Punctuated::parse_terminated)?;
                     list.into_iter().try_fold(meta, VersionMeta::merge)
-                })?;
-            let since = meta.since.unwrap_or_else(|| parse_quote!(1f64));
-            let until = meta.until.unwrap_or_else(|| parse_quote!(1f64));
-
+                }).unwrap_or(VersionMeta::default());
+                
+            
+            let span = field.span();
+            let since = meta.since.unwrap_or_else(|| LitStr::new("1.0", span));
+            let until = meta.until.unwrap_or_else(|| LitStr::new("9999.9", span));
             let field_name = field.ident.unwrap();
 
             let new_name_token_max = format_ident!("{}_version_max", field_name);
@@ -124,7 +126,7 @@ pub fn version_derive(input: DeriveInput) -> syn::Result<TokenStream> {
     };
     new_ast.extend(version_field_ast);
 
-    // // 实现ToJson
+    // 实现trait
     let to_json_ast = quote! {
         use std::collections::BTreeMap;
         use into_json::IntoJson;
@@ -135,16 +137,7 @@ pub fn version_derive(input: DeriveInput) -> syn::Result<TokenStream> {
                 format!("{:?}",map)
             }
         }
-        // use std::fmt::{write, Display, Formatter};
-        // use std::collections::BTreeMap;
-        // impl Display for #struct_name {
-        //     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        //         let mut map = BTreeMap::new();
-        //         let version = 1.0_f32;
-        //          #(#to_json_code_list)*
-        //         write!(f,"{:?}",map)
-        //     }
-        // }
+
     };
     new_ast.extend(to_json_ast);
     Ok(new_ast)

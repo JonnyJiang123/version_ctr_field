@@ -5,13 +5,13 @@ fn main() {
         name: "John".to_string(),
         email: "john@example.com".to_string(),
     };
-    println!("{}", person.into_json(18.0_f32));
+    println!("{}", person.into_json(20.0_f32));
 }
 #[derive(VersionCtr)]
 struct Person {
     #[version(since = "1.0", until = "15.0")]
     name: String,
-    #[version(since = "1.0", until = "20.0")]
+    #[version]
     email: String,
 }
 
