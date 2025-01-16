@@ -1,0 +1,8 @@
+[package]
+name = "final_test"
+version.workspace = true
+edition.workspace = true
+resolver = "2"
+[dependencies]
+core_macro = { version = "0.1.0", path = "../core_macro" }
+into_json = { version = "0.1.0", path = "../into_json" }

@@ -1,0 +1,6 @@
+[package]
+name = "into_json"
+version.workspace = true
+edition.workspace = true
+resolver = "2"
+[dependencies]
